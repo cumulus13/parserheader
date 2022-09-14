@@ -20,10 +20,10 @@ version = __version__.version
 setup(
     name="parserheader",
     version=version,
-    url="https://bitbucket.org/licface/parserheader",
+    url="https://github.com/cumulus13/parserheader",
     project_urls={
-        "Documentation": "https://bitbucket.org/licface/parserheader",
-        "Code": "https://bitbucket.org/licface/parserheader",
+        "Documentation": "https://github.com/cumulus13/parserheader",
+        "Code": "https://github.com/cumulus13/parserheader",
     },
     license="BSD",
     author="Hadi Cahyadi LD",

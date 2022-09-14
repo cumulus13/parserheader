@@ -1,9 +1,22 @@
+#!/usr/bin/env python
+
 import re
 import click
+from pprint import pprint
+try:
+    from pause import pause
+except:
+    def pause(*args, **kwargs):
+        input("enter to continue")
+try:
+    from pydebugger.debug import debug
+except:
+    def debug(*args, **kwargs):
+        return ''
 
 if __name__ == '__main__':
     try:
-        from debug import *
+        from pydebugger.debug import debug
     except:
         def debug(headers_dict=None):
             import os
@@ -14,16 +27,18 @@ else:
         return None
 
 class parserheader(object):
+
     def __init__(self):
         super(parserheader, self)
 
+    @classmethod
     def setCookies(self, cookies_str_or_dict, dont_format=False, **kwargs):
         cookie_dict = {}
         cookie_str = ''
         # if not cookies_str_or_dict:
         #     cookies_str_or_dict = "ym_uid=1532996994661863820; _ym_d=1532996994; _ym_isad=2; tr=2 4 6 8 9 10"
         if __name__ == '__main__':
-            click.secho("Example Input string cookies:", fg='white', bg='blue')
+            click.secho("Example Input string cookies:", fg='black', bg='cyan')
             print(cookies_str_or_dict)
         if isinstance(cookies_str_or_dict, str) or isinstance(cookies_str_or_dict, unicode):
             cookies_str_or_dict = re.split("; ", cookies_str_or_dict)
@@ -44,7 +59,7 @@ class parserheader(object):
         if not cookie_str:
             cookie_str = cookies_str_or_dict
         if __name__ == '__main__':
-            click.secho("Example Output Dictionary cookies:", fg='white', bg='green')
+            click.secho("Example Output Dictionary cookies:", fg='black', bg='green')
             print(cookie_dict)
             print("-" * (click.get_terminal_size()[0] - 1))
             print("\n")
@@ -59,7 +74,7 @@ class parserheader(object):
             return self.setCookies(cookie_dict)
         return cookie_dict, cookie_str
 
-
+    @classmethod
     def parserHeader(self, string_headers = None, get_path='/', cookies_dict_str='', **kwargs):
         # cookies_dict_str example: _ym_uid=1532996994661863820; _ym_d=1532996994; _ym_isad=2;
         #
@@ -79,15 +94,31 @@ class parserheader(object):
             string_headers = string_headers_example
         
         if string_headers:
-            data = str(string_headers).replace("       ", "")
-            data = re.split("\n", data)
-            #print "data 1 =", data
+            # data = str(string_headers).replace("       ", "")
+            # data = re.split("\n|\r", data)
+            data = re.split("\n|\r", string_headers)
+            debug(data = data)
+            data = [i.strip() for i in data]
+            debug(data = data)
+            data = list(filter(None, data))
+            debug(data = data)
+            
             for i in data:
+                debug(i = i)
+                key, value = '', ''
                 if ": " in i:
-                    key, value = re.split(": ", i)
-                    key = key.strip()
-                    value = value.strip()
-                    headers_dict.update({key: value,})
+                    data_split = re.split(": ", i)
+                    debug(data_split = data_split)
+                    if len(data_split) == 2:
+                        key, value = data_split
+                        key = key.strip()
+                        value = value.strip()
+                        if value == "''" or value == '""': value = ''
+                        headers_dict.update({key: value,})
+                elif ":" in i:
+                    data_split = re.split(":", i)
+                    key, value = data_split[0], ":".join(data_split[1:])
+
             if kwargs:
                 for i in kwargs:
                     key = str(i).replace("_","-").title()
@@ -102,9 +133,10 @@ class parserheader(object):
                     cd, cs = self.setCookies(cookies_dict_str)
                     headers_dict.update({'Cookie':cs})
                     debug(headers_dict=headers_dict)
-            debug(headers_dict = headers_dict)
+            debug(headers_dict = headers_dict, debug = 1)
         return headers_dict
 
+    @classmethod
     def UserAgent(self, user_agent_string):
         '''Get User-Agent
         
@@ -120,17 +152,31 @@ class parserheader(object):
             user_agent = user_agent_string
         user_agent_split = re.split(' ', user_agent, 1)
         if __name__ == '__main__':
-            click.secho("Example Output Get User-Agent:", fg='white', bg='yellow')
+            click.secho("Example Output Get User-Agent:", fg='black', bg='yellow')
             print("user_agent =", user_agent)
             print("user_agent_split =", user_agent_split)
             print("-" * (click.get_terminal_size()[0] - 1))
             print("\n")
         return user_agent, user_agent_split
 
+class parser(parserheader):
+
+    headers = ""
+
+    def __init__(self, headers = None):
+        self.headers = headers
+
+    @classmethod
+    def parser(self, *args, **kwargs):
+        if hasattr(self, 'headers'):
+            return self.parserHeader(self.headers, *args, **kwargs)
+        return self.parserHeader(*args, **kwargs)
+
 if __name__ == '__main__':
+    
     import sys
     if len(sys.argv) == 1:
-        click.secho("Example Get Input Data headers string:", fg='white', bg='cyan')
+        click.secho("Example Get Input Data headers string:", fg='black', bg='cyan')
         example_header = """
         Host: ''
         Connection: keep-alive
@@ -143,6 +189,7 @@ if __name__ == '__main__':
         Cookie: ''
     """
         click.secho("Example Output Dictionary Headers:", fg='white', bg='magenta')
+        c = parserheader()
         print(c.parserHeader())
         c.setCookies(None)
         c.UserAgent(example_header)
