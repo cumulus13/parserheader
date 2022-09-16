@@ -87,16 +87,18 @@ class Parserheader(object):
         return False
 
     def __add__(self, data):
-        if not isinstance(data, dict):
-            print("data is not dictionary !")
-            return self.headers
-        check = list(filter(lambda k: k in [i.lower() for i in list(data.keys())], [i.lower() for i in list(self.headers.keys())]))
-        if not check:
-            self.headers.update(data)
-        else:
-            for i in data:
-                self.__setitem__(i, data.get(i))
+        if isinstance(data, dict):
+            check = list(filter(lambda k: k in [i.lower() for i in list(data.keys())], [i.lower() for i in list(self.headers.keys())]))
+            if not check:
+                self.headers.update(data)
+            else:
+                for i in data:
+                    self.__setitem__(i, data.get(i))
+            return self
+        elif isinstance(data, Parserheader):
+            return self.__add__(data.headers)
 
+        print("data is not dictionary or Parserheader object !")
         return self
 
     def __iadd__(self, data):
