@@ -14,19 +14,8 @@ try:
     from pydebugger.debug import debug
 except:
     def debug(*args, **kwargs):
-        return ''
-
-if __name__ == '__main__':
-    try:
-        from pydebugger.debug import debug
-    except:
-        def debug(headers_dict=None):
-            import os
-            if os.getenv('DEBUG'):
-                print("headers_dict =", headers_dict)
-else:
-    def debug(*args, **kwargs):
-        return None
+        for i in kwargs:
+            print(i, "=", kwargs.get(i), type(kwargs.get(i)))
 
 class Parserheader(object):
 
@@ -179,7 +168,11 @@ class Parserheader(object):
         headers_dict = {}
         string_headers = string_headers or self.headers or string_headers_example
 
-        
+        if isinstance(string_headers, bytes):
+            string_headers = string_headers.decode('utf-8')
+
+        if isinstance(string_headers, unicode):
+            string_headers = string_headers.encode('utf-8')
         
         if isinstance(string_headers, str):
             data = re.split("\n|\r", string_headers)
@@ -190,7 +183,6 @@ class Parserheader(object):
             
             
             for i in data:
-                
                 key, value = '', ''
                 if ": " in i:
                     data_split = re.split(": ", i)
@@ -198,6 +190,8 @@ class Parserheader(object):
                         key, value = data_split
                         key = key.strip()
                         value = value.strip()
+                        # if (value[0] == '"' and value[-1] == '"') or (value[0] == "'" and value[-1] == "'"):
+                        #     value = value[1:-1]
                         if value == "''" or value == '""': value = ''
                         key = "-".join([x.title() for x in re.split("-|_", key)])
                         headers_dict.update({key: value,})
