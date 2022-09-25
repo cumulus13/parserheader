@@ -3,6 +3,7 @@
 from __future__ import print_function
 
 import re
+import sys
 import click
 from pprint import pprint
 try:
@@ -171,8 +172,9 @@ class Parserheader(object):
         if isinstance(string_headers, bytes):
             string_headers = string_headers.decode('utf-8')
 
-        if isinstance(string_headers, unicode):
-            string_headers = string_headers.encode('utf-8')
+        if sys.version_info.major == 2:
+            if isinstance(string_headers, unicode):
+                string_headers = string_headers.encode('utf-8')
         
         if isinstance(string_headers, str):
             data = re.split("\n|\r", string_headers)
