@@ -1,5 +1,5 @@
 import io
-import re
+#import re
 from setuptools import setup
 import shutil
 import os
@@ -9,7 +9,7 @@ except:
     pass
 shutil.copy2('__version__.py', 'parserheader')
 
-with io.open("README.rst", "rt", encoding="utf8") as f:
+with io.open("README.md", "rt", encoding="utf8") as f:
     readme = f.read()
 
 # with io.open("__version__.py", "rt", encoding="utf8") as f:
@@ -37,7 +37,7 @@ setup(
     install_requires=[
         'click',
     ],
-    data_files=['__version__.py', 'README.rst', 'LICENSE.rst'],
+    data_files=['__version__.py', 'README.md', 'LICENSE.rst'],
     include_package_data=True,
     python_requires=">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*",
     classifiers=[
