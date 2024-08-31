@@ -22,11 +22,11 @@ class Parserheader(object):
 
     headers = {}
 
-    def __init__(self, headers = None):
+    def __init__(self, headers = None, **kwargs):
         self.headers = headers or self.headers
         super(Parserheader, self)
 
-        self.headers = self.parserheader(self.headers)
+        self.headers = self.parserheader(self.headers, **kwargs)
 
         for i in list(self.headers.keys()):
             key = "_".join([x.title() for x in re.split("-", i)])
@@ -152,7 +152,8 @@ class Parserheader(object):
         return cookie_dict, cookie_str
 
     @classmethod
-    def parserheader(self, string_headers = None, get_path='/', cookies_dict_str='', **kwargs):
+    def parserheader(self, string_headers = None, get_path='/', cookies_dict_str='', show_empty = False, **kwargs):
+        headers = ""
         # cookies_dict_str example: _ym_uid=1532996994661863820; _ym_d=1532996994; _ym_isad=2;
         #
         string_headers_example = """
@@ -166,28 +167,33 @@ class Parserheader(object):
         Accept-Language: en-US,en;q=0.9
         Cookie: ''
         """
+        debug(show_empty = show_empty)
         headers_dict = {}
         string_headers = string_headers or self.headers or string_headers_example
-
-        if isinstance(string_headers, bytes):
-            string_headers = string_headers.decode('utf-8')
-
+        debug(string_headers = string_headers)
+        
+        if isinstance(string_headers, bytes): string_headers = string_headers.decode('utf-8')
+        
         if sys.version_info.major == 2:
-            if isinstance(string_headers, unicode):
-                string_headers = string_headers.encode('utf-8')
+            if isinstance(string_headers, unicode): string_headers = string_headers.encode('utf-8')
+        
+        debug(string_headers = string_headers)
         
         if isinstance(string_headers, str):
             data = re.split("\n|\r", string_headers)
-            
+            debug(data = data)
             data = [i.strip() for i in data]
-            
+            debug(data = data)
             data = list(filter(None, data))
+            debug(data = data)
             
-            
-            for i in data:
+            for index, i in enumerate(data):
                 key, value = '', ''
-                if ": " in i:
-                    data_split = re.split(": ", i)
+                debug(i = i)
+                debug(i_3 = i[-3:])
+                if ":" in i:#[-3:]:
+                    data_split = list(filter(None, re.split(": |:", i)))
+                    debug(data_split = data_split)
                     if len(data_split) == 2:
                         key, value = data_split
                         key = key.strip()
@@ -196,29 +202,49 @@ class Parserheader(object):
                         #     value = value[1:-1]
                         if value == "''" or value == '""': value = ''
                         key = "-".join([x.title() for x in re.split("-|_", key)])
-                        headers_dict.update({key: value,})
+                        debug(key = key)
+                        debug(value = value)
+                        if show_empty and not value:
+                            headers_dict.update({key: value,})
+                        else:
+                            if value: headers_dict.update({key: value,})
+                            
+                    elif len(data_split) == 1:
+                        key = data_split[0]
+                        debug(key = key)
+                        value = data[index + 1].strip()
+                        debug(key = key)
+                        debug(value = value)
+                        if show_empty and not value:
+                            headers_dict.update({key: value,})
+                        else:
+                            if value: headers_dict.update({key: value,})
                 else:
                     if ":" in i:
                         data_split = re.split(":", i)
                         key, value = data_split[0], ":".join(data_split[1:])
-            
+            debug(headers_dict = headers_dict)
         elif isinstance(string_headers, dict):
             headers_dict = string_headers
-
+            debug(headers_dict = headers_dict)
+        
         if kwargs:
+            debug(kwargs = kwargs)
             for i in kwargs:
                 # key = "-".join([x.title() for x in re.split("_", i)])
                 key = "-".join([x.title() for x in re.split("-|_", i)])
                 value = kwargs.get(i)
-                headers_dict.update({key:value})
- 
+                debug(key = key)
+                debug(value = value)
+                if show_empty and not value:
+                    headers_dict.update({key:value})
+                else:
+                    if value: headers_dict.update({key:value})
+        debug(headers = headers)
         self.headers = headers_dict
- 
-        if cookies_dict_str:
-            self.__setitem__('cookie', self.setCookies(cookies_dict_str)[1])
         
         return self.headers
-
+    
     @classmethod
     def useragent(self, user_agent = None):
         '''Get User-Agent
@@ -324,19 +350,26 @@ class Parser(Parserheader):
         return self.parserheader(*args, **kwargs)
 
 if __name__ == '__main__':
-    headers = """accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
-accept-encoding: gzip, deflate, br
-accept-language: en-US,en;q=0.9,id;q=0.8,ru;q=0.7
-cache-control: max-age=0
-sec-fetch-dest: document
-sec-fetch-mode: navigate
-sec-fetch-site: none
-sec-fetch-user: ?1
-upgrade-insecure-requests: 1
-user-agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.92 Safari/537.36
-origin: www.google.com"""
-    click.secho("Example Output:", fg='black', bg='green')
-    click.secho(str(Parserheader.parserheader(headers)), fg = 'black', bg = 'yellow')
+    #headers = """accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
+#accept-encoding: gzip, deflate, br
+#accept-language: en-US,en;q=0.9,id;q=0.8,ru;q=0.7
+#cache-control: max-age=0
+#sec-fetch-dest: document
+#sec-fetch-mode: navigate
+#sec-fetch-site: none
+#sec-fetch-user: ?1
+#Referer: ''
+#upgrade-insecure-requests: 1
+#user-agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.92 Safari/537.36
+#origin: www.google.com"""
+    #click.secho("Example Output:", fg='black', bg='green')
+    #click.secho(str(Parserheader.parserheader(headers)), fg = 'black', bg = 'yellow')
+    from jsoncolor import jprint
+    #print(headers)
+    #jprint(str(Parserheader.parserheader(headers)))
+    
+    h = Parserheader()
+    jprint(h())
     # import sys
     # if len(sys.argv) == 1:
     #     click.secho("Example Get Input Data headers string:", fg='black', bg='cyan')
