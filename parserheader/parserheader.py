@@ -192,7 +192,7 @@ class Parserheader(object):
                 debug(i = i)
                 debug(i_3 = i[-3:])
                 if ":" in i:#[-3:]:
-                    data_split = list(filter(None, re.split(": |:", i)))
+                    data_split = list(filter(None, re.split(": ", i)))
                     debug(data_split = data_split)
                     if len(data_split) == 2:
                         key, value = data_split
@@ -367,8 +367,12 @@ if __name__ == '__main__':
     from jsoncolor import jprint
     #print(headers)
     #jprint(str(Parserheader.parserheader(headers)))
-    
-    h = Parserheader()
+    p = None
+    if len(sys.argv) > 1:
+        if sys.argv[1] == 'c':
+            import clipboard
+            p = clipboard.paste()
+    h = Parserheader(p)
     jprint(h())
     # import sys
     # if len(sys.argv) == 1:
