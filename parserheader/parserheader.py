@@ -113,7 +113,7 @@ class Parserheader(object):
             click.secho("Example Input string cookies:", fg='black', bg='cyan')
             print((cookies_str_or_dict or ''))
 
-        if isinstance(cookies_str_or_dict, str) or isinstance(cookies_str_or_dict, unicode):
+        if isinstance(cookies_str_or_dict, str) or isinstance(cookies_str_or_dict, bytes):
             cookies_str_or_dict = re.split("; ", cookies_str_or_dict)
             for i in cookies_str_or_dict:
                 if i.strip():
@@ -175,7 +175,7 @@ class Parserheader(object):
         if isinstance(string_headers, bytes): string_headers = string_headers.decode('utf-8')
         
         if sys.version_info.major == 2:
-            if isinstance(string_headers, unicode): string_headers = string_headers.encode('utf-8')
+            if isinstance(string_headers, bytes): string_headers = string_headers.encode('utf-8')
         
         debug(string_headers = string_headers)
         
@@ -260,8 +260,8 @@ class Parserheader(object):
                 self.__setitem__('User-Agent', user_agent)
         elif isinstance(user_agent, dict):
             if 'user-agent' in [i.lower() for i in list(user_agent.keys())]:
-                index = [i.lower() for i in list(user_agent.keys())].indent('user-agent')
-                self.__setitem__('User-Agent', user_agent.get(list(user_agent.keys())[indent]))
+                index = [i.lower() for i in list(user_agent.keys())].index('user-agent')
+                self.__setitem__('User-Agent', user_agent.get(list(user_agent.keys())[index]))
 
         if __name__ == '__main__':
             click.secho("Example Output Get User-Agent:", fg='black', bg='yellow')
